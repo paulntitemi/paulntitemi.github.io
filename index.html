@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .terminal-container {
+            width: 90%;
+            max-width: 900px;
+            height: 85vh;
+            margin: 50px auto;
+            background: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 255, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: #2a2a2a;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .red { background: #ff5f56; }
+        .yellow { background: #ffbd2e; }
+        .green { background: #27c93f; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .terminal-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-output {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .prompt {
+            color: #00ff00;
+        }
+
+        .command {
+            color: #00d4ff;
+        }
+
+        .output {
+            color: #cccccc;
+            margin-left: 0;
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        .success {
+            color: #00ff00;
+        }
+
+        .highlight {
+            color: #ffff00;
+        }
+
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .terminal-input-line .prompt {
+            margin-right: 8px;
+        }
+
+        #terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #00d4ff;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            outline: none;
+            caret-color: #00ff00;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 18px;
+            background: #00ff00;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .ascii-art {
+            color: #00ff00;
+            font-size: 10px;
+            line-height: 1.2;
+            white-space: pre;
+        }
+
+        a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00cc00;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-button red"></div>
+            <div class="terminal-button yellow"></div>
+            <div class="terminal-button green"></div>
+            <div class="terminal-title">portfolio@terminal:~</div>
+        </div>
+        <div class="terminal-body">
+            <div class="terminal-output" id="output"></div>
+            <div class="terminal-input-line">
+                <span class="prompt">visitor@portfolio:~$</span>
+                <input type="text" id="terminal-input" autofocus autocomplete="off">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const output = document.getElementById('output');
+        const input = document.getElementById('terminal-input');
+        let commandHistory = [];
+        let historyIndex = -1;
+        let conversationHistory = [];
+        let isProcessing = false;
+
+        // Your personal information - CUSTOMIZE THIS!
+        const personalInfo = `
+You are an AI assistant representing a developer's portfolio terminal. Here's information about the person:
+
+NAME: [Your Name]
+ROLE: Full-Stack Developer
+LOCATION: [Your City, Country]
+
+ABOUT:
+I'm a passionate developer who loves building interactive and creative web experiences. I specialize in full-stack development and enjoy solving complex problems with elegant solutions. When I'm not coding, you can find me exploring new technologies, contributing to open source, or enjoying a good cup of coffee.
+
+SKILLS:
+- Languages: JavaScript/TypeScript, Python, HTML/CSS, SQL
+- Frontend: React, Vue.js, Tailwind CSS, Three.js
+- Backend: Node.js, Express, Django, Flask
+- Databases: PostgreSQL, MongoDB
+- Tools: Git/GitHub, Docker, VS Code
+
+PROJECTS:
+1. E-Commerce Platform - Full-stack online store with payment integration (React, Node.js, MongoDB)
+2. Task Management App - Collaborative project management tool (Vue.js, Firebase, Tailwind)
+3. AI Chatbot - Natural language processing chatbot (Python, TensorFlow, Flask)
+4. Portfolio Terminal - Interactive terminal portfolio (HTML, CSS, JavaScript)
+
+EXPERIENCE:
+- Senior Developer at Tech Corp (2022-Present): Led development of core features, mentored juniors, improved performance by 40%
+- Full Stack Developer at StartupXYZ (2020-2022): Built scalable applications, implemented CI/CD
+- Junior Developer at WebSolutions (2018-2020): Developed responsive websites
+
+EDUCATION:
+- BS in Computer Science, University Name (2014-2018), GPA: 3.8/4.0
+- Certifications: AWS Certified Developer, MongoDB Professional
+
+CONTACT:
+- Email: your.email@example.com
+- LinkedIn: linkedin.com/in/yourprofile
+- GitHub: github.com/yourusername
+- Twitter: @yourhandle
+
+INSTRUCTIONS:
+- Answer questions about this person in a friendly, conversational way
+- Keep responses concise but informative (2-4 sentences usually)
+- Be enthusiastic about their work and skills
+- If asked something not covered in the info, politely say you don't have that information
+- Use a casual, approachable tone
+- Don't use markdown formatting in responses, use plain text
+`;
+
+        async function askClaude(userMessage) {
+            conversationHistory.push({
+                role: "user",
+                content: userMessage
+            });
+
+            try {
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 500,
+                        messages: [
+                            {
+                                role: "user",
+                                content: personalInfo
+                            },
+                            {
+                                role: "assistant",
+                                content: "I understand! I'll answer questions about you based on the information provided. I'll keep my responses conversational, concise, and friendly."
+                            },
+                            ...conversationHistory
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                const assistantMessage = data.content[0].text;
+                
+                conversationHistory.push({
+                    role: "assistant",
+                    content: assistantMessage
+                });
+
+                return assistantMessage;
+            } catch (error) {
+                console.error("Error calling Claude:", error);
+                return "Sorry, I'm having trouble connecting right now. Please try again!";
+            }
+        }
+
+        const commands = {
+            help: {
+                description: 'Display available commands',
+                action: () => {
+                    return `<div class="output">
+Available commands:
+  <span class="highlight">help</span>       - Display this help message
+  <span class="highlight">about</span>      - Learn more about me
+  <span class="highlight">skills</span>     - View my technical skills
+  <span class="highlight">projects</span>   - Browse my projects
+  <span class="highlight">experience</span> - View my work experience
+  <span class="highlight">education</span>  - See my educational background
+  <span class="highlight">contact</span>    - Get my contact information
+  <span class="highlight">clear</span>      - Clear the terminal
+  <span class="highlight">banner</span>     - Display welcome banner
+
+Type any command to get started!
+</div>`;
+                }
+            },
+            about: {
+                description: 'Information about me',
+                action: () => {
+                    return `<div class="output">
+<span class="success">About Me</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Hi! I'm a passionate developer who loves building 
+interactive and creative web experiences.
+
+I specialize in full-stack development and enjoy 
+solving complex problems with elegant solutions.
+
+When I'm not coding, you can find me exploring 
+new technologies, contributing to open source, 
+or enjoying a good cup of coffee.
+</div>`;
+                }
+            },
+            skills: {
+                description: 'My technical skills',
+                action: () => {
+                    return `<div class="output">
+<span class="success">Technical Skills</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="highlight">Languages:</span>
+  • JavaScript/TypeScript
+  • Python
+  • HTML/CSS
+  • SQL
+
+<span class="highlight">Frontend:</span>
+  • React, Vue.js
+  • Tailwind CSS
+  • Three.js
+
+<span class="highlight">Backend:</span>
+  • Node.js, Express
+  • Django, Flask
+  • PostgreSQL, MongoDB
+
+<span class="highlight">Tools:</span>
+  • Git/GitHub
+  • Docker
+  • VS Code
+</div>`;
+                }
+            },
+            projects: {
+                description: 'View my projects',
+                action: () => {
+                    return `<div class="output">
+<span class="success">Featured Projects</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="highlight">1. E-Commerce Platform</span>
+   Full-stack online store with payment integration
+   Tech: React, Node.js, MongoDB
+
+<span class="highlight">2. Task Management App</span>
+   Collaborative project management tool
+   Tech: Vue.js, Firebase, Tailwind
+
+<span class="highlight">3. AI Chatbot</span>
+   Natural language processing chatbot
+   Tech: Python, TensorFlow, Flask
+
+<span class="highlight">4. Portfolio Terminal</span>
+   This interactive terminal portfolio!
+   Tech: HTML, CSS, JavaScript
+</div>`;
+                }
+            },
+            experience: {
+                description: 'My work experience',
+                action: () => {
+                    return `<div class="output">
+<span class="success">Work Experience</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="highlight">Senior Developer</span> @ Tech Corp
+2022 - Present
+• Led development of core product features
+• Mentored junior developers
+• Improved system performance by 40%
+
+<span class="highlight">Full Stack Developer</span> @ StartupXYZ
+2020 - 2022
+• Built scalable web applications
+• Implemented CI/CD pipelines
+• Collaborated with cross-functional teams
+
+<span class="highlight">Junior Developer</span> @ WebSolutions
+2018 - 2020
+• Developed responsive websites
+• Maintained legacy codebases
+• Participated in agile sprints
+</div>`;
+                }
+            },
+            education: {
+                description: 'Educational background',
+                action: () => {
+                    return `<div class="output">
+<span class="success">Education</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="highlight">Bachelor of Science in Computer Science</span>
+University Name, 2014-2018
+• GPA: 3.8/4.0
+• Focus: Software Engineering
+• Activities: Programming Club President
+
+<span class="highlight">Certifications:</span>
+  • AWS Certified Developer
+  • MongoDB Certified Professional
+  • React Advanced Patterns
+</div>`;
+                }
+            },
+            contact: {
+                description: 'Get in touch',
+                action: () => {
+                    return `<div class="output">
+<span class="success">Contact Information</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Feel free to reach out!
+
+<span class="highlight">Email:</span>     your.email@example.com
+<span class="highlight">LinkedIn:</span>  <a href="https://linkedin.com/in/yourprofile" target="_blank">linkedin.com/in/yourprofile</a>
+<span class="highlight">GitHub:</span>    <a href="https://github.com/yourusername" target="_blank">github.com/yourusername</a>
+<span class="highlight">Twitter:</span>   <a href="https://twitter.com/yourhandle" target="_blank">@yourhandle</a>
+<span class="highlight">Website:</span>   <a href="https://yourwebsite.com" target="_blank">yourwebsite.com</a>
+
+Let's build something amazing together!
+</div>`;
+                }
+            },
+            clear: {
+                description: 'Clear the terminal',
+                action: () => {
+                    output.innerHTML = '';
+                    return '';
+                }
+            },
+            banner: {
+                description: 'Display welcome banner',
+                action: () => {
+                    return getBanner();
+                }
+            }
+        };
+
+        function getBanner() {
+            return `<div class="ascii-art">
+ ██████╗  ██████╗ ██████╗ ████████╗███████╗ ██████╗ ██╗     ██╗ ██████╗ 
+ ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝██╔════╝██╔═══██╗██║     ██║██╔═══██╗
+ ██████╔╝██║   ██║██████╔╝   ██║   █████╗  ██║   ██║██║     ██║██║   ██║
+ ██╔═══╝ ██║   ██║██╔══██╗   ██║   ██╔══╝  ██║   ██║██║     ██║██║   ██║
+ ██║     ╚██████╔╝██║  ██║   ██║   ██║     ╚██████╔╝███████╗██║╚██████╔╝
+ ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ 
+</div>
+<div class="output">
+<span class="success">Welcome to my interactive portfolio terminal!</span>
+
+Type <span class="highlight">'help'</span> to see available commands.
+Type <span class="highlight">'about'</span> to learn more about me.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+</div>`;
+        }
+
+        function addLine(content, type = '') {
+            const line = document.createElement('div');
+            line.className = `terminal-line ${type}`;
+            line.innerHTML = content;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function processCommand(cmd) {
+            const trimmedCmd = cmd.trim().toLowerCase();
+            
+            addLine(`<span class="prompt">visitor@portfolio:~$</span> <span class="command">${cmd}</span>`);
+
+            if (trimmedCmd === '') {
+                return;
+            }
+
+            if (commands[trimmedCmd]) {
+                const result = commands[trimmedCmd].action();
+                if (result) {
+                    addLine(result);
+                }
+            } else {
+                addLine(`<span class="error">Command not found: ${cmd}</span>
+<span class="output">Type 'help' for available commands.</span>`, 'error');
+            }
+
+            commandHistory.unshift(cmd);
+            historyIndex = -1;
+        }
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = input.value;
+                processCommand(cmd);
+                input.value = '';
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    input.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    input.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = -1;
+                    input.value = '';
+                }
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                const partial = input.value.toLowerCase();
+                const matches = Object.keys(commands).filter(cmd => cmd.startsWith(partial));
+                if (matches.length === 1) {
+                    input.value = matches[0];
+                }
+            }
+        });
+
+        // Keep input focused
+        document.addEventListener('click', () => {
+            input.focus();
+        });
+
+        // Display welcome banner on load
+        window.addEventListener('load', () => {
+            addLine(getBanner());
+        });
+    </script>
+</body>
+</html>
