@@ -622,7 +622,7 @@ Examples: "Tell me about your IoT experience", "What's the AgriConnect project?"
             output.scrollTop = output.scrollHeight;
         }
 
-        async function processCommand(cmd) {
+        function processCommand(cmd) {
             const trimmedCmd = cmd.trim();
             const lowerCmd = trimmedCmd.toLowerCase();
             
