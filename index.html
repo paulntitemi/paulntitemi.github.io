@@ -190,51 +190,6 @@
         const input = document.getElementById('terminal-input');
         let commandHistory = [];
         let historyIndex = -1;
-        let conversationHistory = [];
-        let isProcessing = false;
-
-        // Set this to your backend URL
-        // For local development: 'http://localhost:3000'
-        // For production: 'https://your-backend-url.com'
-        const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
-            : 'https://your-backend-url.com'; // UPDATE THIS!
-
-        async function askClaude(userMessage) {
-            conversationHistory.push({
-                role: "user",
-                content: userMessage
-            });
-
-            try {
-                const response = await fetch(`${API_URL}/api/chat`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        messages: conversationHistory
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const data = await response.json();
-                const assistantMessage = data.content[0].text;
-                
-                conversationHistory.push({
-                    role: "assistant",
-                    content: assistantMessage
-                });
-
-                return assistantMessage;
-            } catch (error) {
-                console.error("Error calling API:", error);
-                return "Sorry, I'm having trouble connecting right now. AI features may not be available.";
-            }
-        }
 
         const commands = {
             help: {
@@ -684,27 +639,22 @@ Examples: "Tell me about your IoT experience", "What's the AgriConnect project?"
                     addLine(result);
                 }
             } else {
-                // If not a command, treat it as a natural language query to Claude
-                if (isProcessing) {
-                    addLine(`<span class="error">Please wait for the current request to complete...</span>`, 'error');
-                    return;
-                }
-
-                isProcessing = true;
-                addLine(`<span class="output">🤔 Thinking...</span>`);
+                // Command not found - show error with suggestions
+                addLine(`<span class="error">bash: ${trimmedCmd}: command not found</span>`);
                 
-                try {
-                    const response = await askClaude(trimmedCmd);
-                    // Remove the "thinking" message
-                    output.removeChild(output.lastChild);
-                    addLine(`<div class="output"><span class="success">🤖 AI Response:</span>
-${response}</div>`);
-                } catch (error) {
-                    output.removeChild(output.lastChild);
-                    addLine(`<span class="error">AI features unavailable. Try commands like 'help', 'about', or 'skills'.</span>`, 'error');
-                } finally {
-                    isProcessing = false;
+                // Find similar commands (simple matching)
+                const suggestions = Object.keys(commands).filter(cmd => 
+                    cmd.includes(lowerCmd.substring(0, 3)) || 
+                    lowerCmd.includes(cmd.substring(0, 3))
+                ).slice(0, 3);
+                
+                if (suggestions.length > 0) {
+                    addLine(`<div class="output">
+Did you mean: ${suggestions.map(s => `<span class="highlight">${s}</span>`).join(', ')}?
+</div>`);
                 }
+                
+                addLine(`<div class="output">Type <span class="highlight">'help'</span> to see all available commands.</div>`);
             }
 
             commandHistory.unshift(cmd);
@@ -713,7 +663,6 @@ ${response}</div>`);
 
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                if (isProcessing) return;
                 const cmd = input.value;
                 processCommand(cmd);
                 input.value = '';
