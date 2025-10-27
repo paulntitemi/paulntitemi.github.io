@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal Portfolio</title>
+    <title>Paul Yaw Nti - Terminal Portfolio</title>
     <style>
         * {
             margin: 0;
@@ -86,6 +86,7 @@
         .output {
             color: #cccccc;
             margin-left: 0;
+            white-space: pre-line;
         }
 
         .error {
@@ -119,19 +120,6 @@
             font-size: 16px;
             outline: none;
             caret-color: #00ff00;
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 8px;
-            height: 18px;
-            background: #00ff00;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
         }
 
         .ascii-art {
@@ -194,37 +182,33 @@
         const commands = {
             help: {
                 description: 'Display available commands',
-                action: () => {
+                action: function() {
                     return `<div class="output">
 <span class="success">Available Commands:</span>
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-<span class="highlight">Information:</span>
-  about       - Learn about Paul
-  education   - View educational background
-  experience  - See work experience
-  skills      - View technical skills
-  projects    - Browse featured projects
-  contact     - Get contact information
-  
-<span class="highlight">Specific Queries:</span>
-  iot         - IoT and embedded systems expertise
-  publications- View research publications
-  community   - Community involvement and leadership
-  resume      - Download/view full resume
-  
-<span class="highlight">System:</span>
-  clear       - Clear the terminal
-  banner      - Display welcome banner
-  whoami      - Display current user info
-  ls          - List available sections
-  
-Type any command to get started!
+
+about
+banner
+clear
+community
+contact
+education
+experience
+help
+iot
+ls
+projects
+publications
+resume
+skills
+whoami
+
+Type any command to see what it does.
 </div>`;
                 }
             },
             about: {
-                description: 'Information about me',
-                action: () => {
+                description: 'Information about Paul',
+                action: function() {
                     return `<div class="output">
 <span class="success">About Paul Yaw Nti</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -248,8 +232,8 @@ technical expertise in dynamic environments.
                 }
             },
             skills: {
-                description: 'My technical skills',
-                action: () => {
+                description: 'Technical skills',
+                action: function() {
                     return `<div class="output">
 <span class="success">Technical Skills</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -285,7 +269,7 @@ Type 'iot' for more details on IoT expertise!
             },
             iot: {
                 description: 'IoT and embedded systems expertise',
-                action: () => {
+                action: function() {
                     return `<div class="output">
 <span class="success">IoT & Embedded Systems Expertise</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -313,8 +297,8 @@ platforms (GCP) to create end-to-end IoT solutions.
                 }
             },
             projects: {
-                description: 'View my projects',
-                action: () => {
+                description: 'View projects',
+                action: function() {
                     return `<div class="output">
 <span class="success">Featured Projects</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -354,8 +338,8 @@ platforms (GCP) to create end-to-end IoT solutions.
                 }
             },
             experience: {
-                description: 'My work experience',
-                action: () => {
+                description: 'Work experience',
+                action: function() {
                     return `<div class="output">
 <span class="success">Work Experience</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -392,7 +376,7 @@ Sept 2022 – Jan 2023
             },
             education: {
                 description: 'Educational background',
-                action: () => {
+                action: function() {
                     return `<div class="output">
 <span class="success">Education</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -425,7 +409,7 @@ Jan 2021 – Nov 2024
             },
             publications: {
                 description: 'Research publications',
-                action: () => {
+                action: function() {
                     return `<div class="output">
 <span class="success">Research Publications</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -453,7 +437,7 @@ Temperature Monitoring, RSV Vaccines
             },
             community: {
                 description: 'Community involvement',
-                action: () => {
+                action: function() {
                     return `<div class="output">
 <span class="success">Community Involvement & Leadership</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -486,7 +470,7 @@ Jul 2020 - Present
             },
             contact: {
                 description: 'Get in touch',
-                action: () => {
+                action: function() {
                     return `<div class="output">
 <span class="success">Contact Information</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -512,7 +496,7 @@ Available for internships in:
             },
             resume: {
                 description: 'Download resume',
-                action: () => {
+                action: function() {
                     return `<div class="output">
 <span class="success">Resume / CV</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -538,7 +522,7 @@ You can also explore my profile using these commands:
             },
             whoami: {
                 description: 'Display current user info',
-                action: () => {
+                action: function() {
                     return `<div class="output">
 visitor@portfolio:~$ Currently viewing Paul Yaw Nti's portfolio
 
@@ -555,7 +539,7 @@ Type 'help' for available commands
             },
             ls: {
                 description: 'List available sections',
-                action: () => {
+                action: function() {
                     return `<div class="output">
 <span class="success">Available Sections:</span>
 
@@ -576,14 +560,14 @@ Type the section name to view contents
             },
             clear: {
                 description: 'Clear the terminal',
-                action: () => {
+                action: function() {
                     output.innerHTML = '';
                     return '';
                 }
             },
             banner: {
                 description: 'Display welcome banner',
-                action: () => {
+                action: function() {
                     return getBanner();
                 }
             }
@@ -605,65 +589,60 @@ MS Computer Science @ UCL | Systems Engineering for IoT
 Software Engineer | Open to Internship Opportunities
 
 Type <span class="highlight">'help'</span> to see available commands.
-Or just ask me anything naturally - I'm powered by AI! 🤖
 
-Examples: "Tell me about your IoT experience", "What's the AgriConnect project?"
+Examples: 'about', 'skills', 'projects', 'iot', 'contact'
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 </div>`;
         }
-        }
 
-        function addLine(content, type = '') {
-            const line = document.createElement('div');
-            line.className = `terminal-line ${type}`;
+        function addLine(content, type) {
+            var line = document.createElement('div');
+            line.className = 'terminal-line ' + (type || '');
             line.innerHTML = content;
             output.appendChild(line);
             output.scrollTop = output.scrollHeight;
         }
 
         function processCommand(cmd) {
-            const trimmedCmd = cmd.trim();
-            const lowerCmd = trimmedCmd.toLowerCase();
+            var trimmedCmd = cmd.trim();
+            var lowerCmd = trimmedCmd.toLowerCase();
             
-            addLine(`<span class="prompt">visitor@portfolio:~$</span> <span class="command">${cmd}</span>`);
+            addLine('<span class="prompt">visitor@portfolio:~$</span> <span class="command">' + cmd + '</span>');
 
             if (trimmedCmd === '') {
                 return;
             }
 
-            // Check if it's a predefined command
             if (commands[lowerCmd]) {
-                const result = commands[lowerCmd].action();
+                var result = commands[lowerCmd].action();
                 if (result) {
                     addLine(result);
                 }
             } else {
-                // Command not found - show error with suggestions
-                addLine(`<span class="error">bash: ${trimmedCmd}: command not found</span>`);
+                addLine('<span class="error">bash: ' + trimmedCmd + ': command not found</span>');
                 
-                // Find similar commands (simple matching)
-                const suggestions = Object.keys(commands).filter(cmd => 
-                    cmd.includes(lowerCmd.substring(0, 3)) || 
-                    lowerCmd.includes(cmd.substring(0, 3))
-                ).slice(0, 3);
+                var suggestions = Object.keys(commands).filter(function(c) {
+                    return c.includes(lowerCmd.substring(0, 3)) || lowerCmd.includes(c.substring(0, 3));
+                }).slice(0, 3);
                 
                 if (suggestions.length > 0) {
-                    addLine(`<div class="output">
-Did you mean: ${suggestions.map(s => `<span class="highlight">${s}</span>`).join(', ')}?
-</div>`);
+                    var suggestionText = suggestions.map(function(s) {
+                        return '<span class="highlight">' + s + '</span>';
+                    }).join(', ');
+                    addLine('<div class="output">Did you mean: ' + suggestionText + '?</div>');
                 }
                 
-                addLine(`<div class="output">Type <span class="highlight">'help'</span> to see all available commands.</div>`);
+                addLine('<div class="output">Type <span class="highlight">\'help\'</span> to see all available commands.</div>');
             }
 
             commandHistory.unshift(cmd);
             historyIndex = -1;
         }
 
-        input.addEventListener('keydown', (e) => {
+        input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                const cmd = input.value;
+                var cmd = input.value;
                 processCommand(cmd);
                 input.value = '';
             } else if (e.key === 'ArrowUp') {
@@ -683,21 +662,21 @@ Did you mean: ${suggestions.map(s => `<span class="highlight">${s}</span>`).join
                 }
             } else if (e.key === 'Tab') {
                 e.preventDefault();
-                const partial = input.value.toLowerCase();
-                const matches = Object.keys(commands).filter(cmd => cmd.startsWith(partial));
+                var partial = input.value.toLowerCase();
+                var matches = Object.keys(commands).filter(function(cmd) {
+                    return cmd.startsWith(partial);
+                });
                 if (matches.length === 1) {
                     input.value = matches[0];
                 }
             }
         });
 
-        // Keep input focused
-        document.addEventListener('click', () => {
+        document.addEventListener('click', function() {
             input.focus();
         });
 
-        // Display welcome banner on load
-        window.addEventListener('load', () => {
+        window.addEventListener('load', function() {
             addLine(getBanner());
         });
     </script>
