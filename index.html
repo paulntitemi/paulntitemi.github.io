@@ -193,53 +193,12 @@
         let conversationHistory = [];
         let isProcessing = false;
 
-        // Your personal information - CUSTOMIZE THIS!
-        const personalInfo = `
-You are an AI assistant representing a developer's portfolio terminal. Here's information about the person:
-
-NAME: [Your Name]
-ROLE: Full-Stack Developer
-LOCATION: [Your City, Country]
-
-ABOUT:
-I'm a passionate developer who loves building interactive and creative web experiences. I specialize in full-stack development and enjoy solving complex problems with elegant solutions. When I'm not coding, you can find me exploring new technologies, contributing to open source, or enjoying a good cup of coffee.
-
-SKILLS:
-- Languages: JavaScript/TypeScript, Python, HTML/CSS, SQL
-- Frontend: React, Vue.js, Tailwind CSS, Three.js
-- Backend: Node.js, Express, Django, Flask
-- Databases: PostgreSQL, MongoDB
-- Tools: Git/GitHub, Docker, VS Code
-
-PROJECTS:
-1. E-Commerce Platform - Full-stack online store with payment integration (React, Node.js, MongoDB)
-2. Task Management App - Collaborative project management tool (Vue.js, Firebase, Tailwind)
-3. AI Chatbot - Natural language processing chatbot (Python, TensorFlow, Flask)
-4. Portfolio Terminal - Interactive terminal portfolio (HTML, CSS, JavaScript)
-
-EXPERIENCE:
-- Senior Developer at Tech Corp (2022-Present): Led development of core features, mentored juniors, improved performance by 40%
-- Full Stack Developer at StartupXYZ (2020-2022): Built scalable applications, implemented CI/CD
-- Junior Developer at WebSolutions (2018-2020): Developed responsive websites
-
-EDUCATION:
-- BS in Computer Science, University Name (2014-2018), GPA: 3.8/4.0
-- Certifications: AWS Certified Developer, MongoDB Professional
-
-CONTACT:
-- Email: your.email@example.com
-- LinkedIn: linkedin.com/in/yourprofile
-- GitHub: github.com/yourusername
-- Twitter: @yourhandle
-
-INSTRUCTIONS:
-- Answer questions about this person in a friendly, conversational way
-- Keep responses concise but informative (2-4 sentences usually)
-- Be enthusiastic about their work and skills
-- If asked something not covered in the info, politely say you don't have that information
-- Use a casual, approachable tone
-- Don't use markdown formatting in responses, use plain text
-`;
+        // Set this to your backend URL
+        // For local development: 'http://localhost:3000'
+        // For production: 'https://your-backend-url.com'
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : 'https://your-backend-url.com'; // UPDATE THIS!
 
         async function askClaude(userMessage) {
             conversationHistory.push({
@@ -248,27 +207,19 @@ INSTRUCTIONS:
             });
 
             try {
-                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                const response = await fetch(`${API_URL}/api/chat`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        model: "claude-sonnet-4-20250514",
-                        max_tokens: 500,
-                        messages: [
-                            {
-                                role: "user",
-                                content: personalInfo
-                            },
-                            {
-                                role: "assistant",
-                                content: "I understand! I'll answer questions about you based on the information provided. I'll keep my responses conversational, concise, and friendly."
-                            },
-                            ...conversationHistory
-                        ]
+                        messages: conversationHistory
                     })
                 });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
 
                 const data = await response.json();
                 const assistantMessage = data.content[0].text;
@@ -280,8 +231,8 @@ INSTRUCTIONS:
 
                 return assistantMessage;
             } catch (error) {
-                console.error("Error calling Claude:", error);
-                return "Sorry, I'm having trouble connecting right now. Please try again!";
+                console.error("Error calling API:", error);
+                return "Sorry, I'm having trouble connecting right now. AI features may not be available.";
             }
         }
 
@@ -290,17 +241,28 @@ INSTRUCTIONS:
                 description: 'Display available commands',
                 action: () => {
                     return `<div class="output">
-Available commands:
-  <span class="highlight">help</span>       - Display this help message
-  <span class="highlight">about</span>      - Learn more about me
-  <span class="highlight">skills</span>     - View my technical skills
-  <span class="highlight">projects</span>   - Browse my projects
-  <span class="highlight">experience</span> - View my work experience
-  <span class="highlight">education</span>  - See my educational background
-  <span class="highlight">contact</span>    - Get my contact information
-  <span class="highlight">clear</span>      - Clear the terminal
-  <span class="highlight">banner</span>     - Display welcome banner
-
+<span class="success">Available Commands:</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="highlight">Information:</span>
+  about       - Learn about Paul
+  education   - View educational background
+  experience  - See work experience
+  skills      - View technical skills
+  projects    - Browse featured projects
+  contact     - Get contact information
+  
+<span class="highlight">Specific Queries:</span>
+  iot         - IoT and embedded systems expertise
+  publications- View research publications
+  community   - Community involvement and leadership
+  resume      - Download/view full resume
+  
+<span class="highlight">System:</span>
+  clear       - Clear the terminal
+  banner      - Display welcome banner
+  whoami      - Display current user info
+  ls          - List available sections
+  
 Type any command to get started!
 </div>`;
                 }
@@ -309,17 +271,24 @@ Type any command to get started!
                 description: 'Information about me',
                 action: () => {
                     return `<div class="output">
-<span class="success">About Me</span>
+<span class="success">About Paul Yaw Nti</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Hi! I'm a passionate developer who loves building 
-interactive and creative web experiences.
+MS Computer Science student at UCL (GPA: 3.9/4.0) 
+specializing in Systems Engineering for IoT.
 
-I specialize in full-stack development and enjoy 
-solving complex problems with elegant solutions.
+Skilled in embedded systems, network protocols, and 
+cloud integration with a strong foundation in software 
+development. Passionate about developing innovative 
+IoT solutions that bridge hardware and software.
 
-When I'm not coding, you can find me exploring 
-new technologies, contributing to open source, 
-or enjoying a good cup of coffee.
+Currently seeking internship opportunities to apply 
+technical expertise in dynamic environments.
+
+<span class="highlight">Quick Stats:</span>
+• 3+ years of software engineering experience
+• Worked on $40.5M AgriConnect project
+• Published researcher in IoT systems
+• 3,500+ users impacted by projects
 </div>`;
                 }
             },
@@ -329,26 +298,62 @@ or enjoying a good cup of coffee.
                     return `<div class="output">
 <span class="success">Technical Skills</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-<span class="highlight">Languages:</span>
-  • JavaScript/TypeScript
-  • Python
-  • HTML/CSS
-  • SQL
+<span class="highlight">Programming Languages:</span>
+  • C++, C, Python, Java
+  • JavaScript, PHP, Dart, SQL
 
-<span class="highlight">Frontend:</span>
-  • React, Vue.js
-  • Tailwind CSS
-  • Three.js
+<span class="highlight">IoT & Embedded Systems:</span>
+  • I2C, SPI protocols
+  • MQTT, TCP/IP, IPv6
+  • Sensor Systems
 
-<span class="highlight">Backend:</span>
-  • Node.js, Express
-  • Django, Flask
-  • PostgreSQL, MongoDB
+<span class="highlight">Web & Mobile Development:</span>
+  • Flutter, Django, Flask
+  • HTML, CSS, .NET
 
-<span class="highlight">Tools:</span>
-  • Git/GitHub
-  • Docker
-  • VS Code
+<span class="highlight">Cloud & DevOps:</span>
+  • Google Cloud Platform (GCP)
+  • AWS, Jenkins, Linux
+
+<span class="highlight">Databases & Tools:</span>
+  • PostgreSQL, SQL, XML
+  • Jira, MFC
+
+<span class="highlight">Soft Skills:</span>
+  • Analytical & Decision-making
+  • Communication & Collaboration
+  • Project Management
+
+Type 'iot' for more details on IoT expertise!
+</div>`;
+                }
+            },
+            iot: {
+                description: 'IoT and embedded systems expertise',
+                action: () => {
+                    return `<div class="output">
+<span class="success">IoT & Embedded Systems Expertise</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="highlight">Current Focus (UCL MS Program):</span>
+• Sensor Systems design and integration
+• Real-world Multi-agent Systems
+• Machine Learning for Robotics
+• Embedded Systems architecture
+
+<span class="highlight">Protocols & Communication:</span>
+• I2C, SPI - Hardware communication protocols
+• MQTT - Lightweight messaging for IoT devices
+• TCP/IP, IPv6 - Network layer protocols
+
+<span class="highlight">Practical Experience:</span>
+• Published research: Cold-Chain Logistics for RSVs
+• Integrated connectivity solutions (Vodafone, MTN)
+• GPS fleet tracking system (Nsoroma)
+• Sensor data processing and cloud integration
+
+<span class="highlight">Hardware-Software Bridge:</span>
+Combining embedded systems knowledge with cloud 
+platforms (GCP) to create end-to-end IoT solutions.
 </div>`;
                 }
             },
@@ -358,21 +363,38 @@ or enjoying a good cup of coffee.
                     return `<div class="output">
 <span class="success">Featured Projects</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-<span class="highlight">1. E-Commerce Platform</span>
-   Full-stack online store with payment integration
-   Tech: React, Node.js, MongoDB
+<span class="highlight">1. Maizester</span>
+   Cross-platform app with ML model for maize disease detection
+   Tech: C++, MFC, Machine Learning
+   <a href="https://github.com/paulntitemi/M" target="_blank">github.com/paulntitemi/M</a>
 
-<span class="highlight">2. Task Management App</span>
-   Collaborative project management tool
-   Tech: Vue.js, Firebase, Tailwind
+<span class="highlight">2. PulseBreak+</span>
+   Health tracking app with personal AI chatbot
+   Tech: Flutter, Dart, GCP, PostgreSQL
+   <a href="https://github.com/paulntitemi/pb" target="_blank">github.com/paulntitemi/pb</a>
 
-<span class="highlight">3. AI Chatbot</span>
-   Natural language processing chatbot
-   Tech: Python, TensorFlow, Flask
+<span class="highlight">3. AgriConnect (theSOFTtribe)</span>
+   $40.5M project with MasterCard Foundation
+   • 3,500+ students enrolled nationwide
+   • Integrated Vodafone & MTN connectivity
+   • Minimal latency at scale
 
-<span class="highlight">4. Portfolio Terminal</span>
-   This interactive terminal portfolio!
-   Tech: HTML, CSS, JavaScript
+<span class="highlight">4. KNUST Open Courseware</span>
+   Educational platform for open course materials
+   Tech: C#, .NET, SQL, XML
+   <a href="https://github.com/paulntitemi/ocw" target="_blank">github.com/paulntitemi/ocw</a>
+
+<span class="highlight">5. Nsoroma GPS Fleet Tracking</span>
+   Real-time geolocation and tracking software
+   Tech: GPS integration, Backend systems
+
+<span class="highlight">6. eHills EcoPark Website</span>
+   Tourism website with booking system
+   <a href="https://github.com/paulntitemi/eH" target="_blank">github.com/paulntitemi/eH</a>
+
+<span class="highlight">7. Akatua DB Payroll System</span>
+   Payroll management with 80% client satisfaction
+   Tech: Full-stack development
 </div>`;
                 }
             },
@@ -382,23 +404,34 @@ or enjoying a good cup of coffee.
                     return `<div class="output">
 <span class="success">Work Experience</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-<span class="highlight">Senior Developer</span> @ Tech Corp
-2022 - Present
-• Led development of core product features
-• Mentored junior developers
-• Improved system performance by 40%
+<span class="highlight">Software Engineer</span> @ theSOFTtribe, Ghana
+Oct 2024 – Oct 2025
+• Deployed $40.5M AgriConnect project (MasterCard Foundation)
+• Integrated Vodafone & MTN connectivity solutions
+• 3,500+ students enrolled with minimal latency
 
-<span class="highlight">Full Stack Developer</span> @ StartupXYZ
-2020 - 2022
-• Built scalable web applications
-• Implemented CI/CD pipelines
-• Collaborated with cross-functional teams
+<span class="highlight">Software Engineer</span> @ Bornbalanced+, Ghana
+Jan 2025 – Oct 2025
+• Deployed fullstack wellness web application
+• Built scalable backend: PostgreSQL, Django, GCP
+• 2.5x increase in onboarding efficiency
 
-<span class="highlight">Junior Developer</span> @ WebSolutions
-2018 - 2020
-• Developed responsive websites
-• Maintained legacy codebases
-• Participated in agile sprints
+<span class="highlight">Software Engineer</span> @ Rivette Analytics, Ghana
+Dec 2024 – Jan 2025
+• Deployed USSD food ordering application
+• Backend & vendor portal for order management
+• Enabled food ordering without internet connectivity
+
+<span class="highlight">National Service Personnel</span> @ GCB Bank PLC
+Oct 2024 – Nov 2024
+• Client account management & onboarding
+• Risk analysis and back office operations
+
+<span class="highlight">Software Engineer Intern</span> @ theSOFTtribe
+Sept 2022 – Jan 2023
+• AgriConnect system design & implementation
+• Nsoroma GPS fleet tracking software
+• Akatua DB payroll system (80% satisfaction)
 </div>`;
                 }
             },
@@ -408,16 +441,91 @@ or enjoying a good cup of coffee.
                     return `<div class="output">
 <span class="success">Education</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-<span class="highlight">Bachelor of Science in Computer Science</span>
-University Name, 2014-2018
-• GPA: 3.8/4.0
-• Focus: Software Engineering
-• Activities: Programming Club President
+<span class="highlight">MS in Systems Engineering for IoT</span>
+University College London (UCL)
+Sept 2025 – Sept 2026
+• GPA: 3.9/4.0 (Outstanding Performance)
+• Focus: Sensor Systems, Multi-agent Systems, 
+  ML for Robotics, Embedded Systems
+• Location: London, UK
 
-<span class="highlight">Certifications:</span>
-  • AWS Certified Developer
-  • MongoDB Certified Professional
-  • React Advanced Patterns
+<span class="highlight">Advanced AI/ML - NLP Summer Programme</span>
+University of Oxford (Lady Margaret Hall)
+Aug 2025
+• Grade: 73/A (First Class Honours)
+• Neural Networks, Transformers from scratch
+• BART fine-tuning for Text Summarization
+• Wavenet for Asthma Detection
+• RAG System Implementation
+
+<span class="highlight">BS in Computer Science</span>
+Kwame Nkrumah University of Science and Technology
+Jan 2021 – Nov 2024
+• GPA: 3.33/4.0
+• Coursework: Computer Architecture, Data Structures,
+  Software Engineering, Computer Networks, Linear Algebra
+• Location: Kumasi, Ghana
+</div>`;
+                }
+            },
+            publications: {
+                description: 'Research publications',
+                action: () => {
+                    return `<div class="output">
+<span class="success">Research Publications</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="highlight">Cold-Chain Logistics Management System for RSVs</span>
+Published: October 2025
+DOI: 10.1109/UCL.2025.224253
+
+<span class="highlight">Co-Authors:</span>
+• Louis Gorter
+• Paul Yaw Nti
+• Adhish Rao
+• Yuanpu Zheng
+
+<span class="highlight">Abstract:</span>
+Research on IoT-based cold-chain logistics management
+for Respiratory Syncytial Virus (RSV) vaccines, ensuring
+temperature monitoring and data integrity throughout the
+supply chain.
+
+<span class="highlight">Keywords:</span>
+IoT, Cold-Chain Logistics, Healthcare Systems, 
+Temperature Monitoring, RSV Vaccines
+</div>`;
+                }
+            },
+            community: {
+                description: 'Community involvement',
+                action: () => {
+                    return `<div class="output">
+<span class="success">Community Involvement & Leadership</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="highlight">Data Science Tutor</span>
+Deeper Life Campus Fellowship
+Jul 2025 - Present
+• Teaching data science fundamentals
+• Mentoring students in analytics
+
+<span class="highlight">Deputy Director</span>
+TechDrive Africa
+Jan 2025 - Present
+• Leading tech initiatives across Africa
+• Driving technology adoption and education
+
+<span class="highlight">Music Tutor</span>
+Deeper Life Bible Church
+Sept 2021 - Jan 2022
+• Teaching music theory and practice
+• Leading worship sessions
+
+<span class="highlight">Ambassador</span>
+Orphan Art (formerly Hues and Stencils)
+Jul 2020 - Present
+• Supporting orphan education through art
+• Community outreach programs
+• Fundraising and awareness campaigns
 </div>`;
                 }
             },
@@ -427,15 +535,87 @@ University Name, 2014-2018
                     return `<div class="output">
 <span class="success">Contact Information</span>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Feel free to reach out!
+Let's connect and build something amazing!
 
-<span class="highlight">Email:</span>     your.email@example.com
-<span class="highlight">LinkedIn:</span>  <a href="https://linkedin.com/in/yourprofile" target="_blank">linkedin.com/in/yourprofile</a>
-<span class="highlight">GitHub:</span>    <a href="https://github.com/yourusername" target="_blank">github.com/yourusername</a>
-<span class="highlight">Twitter:</span>   <a href="https://twitter.com/yourhandle" target="_blank">@yourhandle</a>
-<span class="highlight">Website:</span>   <a href="https://yourwebsite.com" target="_blank">yourwebsite.com</a>
+<span class="highlight">Email:</span>     paulntitemi@gmail.com
+<span class="highlight">Phone:</span>     +44 0739 716 76 34
+<span class="highlight">Location:</span>  London, UK
+<span class="highlight">Website:</span>   <a href="https://paulntitemi.com" target="_blank">paulntitemi.com</a>
+<span class="highlight">LinkedIn:</span>  <a href="https://linkedin.com/in/paul-nti" target="_blank">linkedin.com/in/paul-nti</a>
+<span class="highlight">GitHub:</span>    <a href="https://github.com/paulntitemi" target="_blank">github.com/paulntitemi</a>
 
-Let's build something amazing together!
+<span class="highlight">Status:</span>    Open to internship opportunities
+<span class="highlight">Interests:</span> IoT, Embedded Systems, ML/AI, Cloud Computing
+
+Available for internships in:
+• Systems Engineering
+• IoT Development
+• Full-Stack Development
+• Embedded Systems
+</div>`;
+                }
+            },
+            resume: {
+                description: 'Download resume',
+                action: () => {
+                    return `<div class="output">
+<span class="success">Resume / CV</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="highlight">View my complete resume:</span>
+
+📄 <a href="https://paulntitemi.com/resume.pdf" target="_blank">Download PDF Resume</a>
+📧 Email me for the latest version: paulntitemi@gmail.com
+
+<span class="highlight">Quick Summary:</span>
+• MS Computer Science @ UCL (3.9 GPA)
+• 3+ years Software Engineering experience
+• IoT & Embedded Systems specialist
+• Published researcher
+• Open to internship opportunities
+
+You can also explore my profile using these commands:
+  • education  - Academic background
+  • experience - Work history
+  • projects   - Portfolio showcase
+  • skills     - Technical abilities
+</div>`;
+                }
+            },
+            whoami: {
+                description: 'Display current user info',
+                action: () => {
+                    return `<div class="output">
+visitor@portfolio:~$ Currently viewing Paul Yaw Nti's portfolio
+
+<span class="highlight">System Info:</span>
+User: visitor
+Host: portfolio-terminal
+Location: paulntitemi.com
+Status: Interactive session active
+
+Type 'about' to learn more about Paul
+Type 'help' for available commands
+</div>`;
+                }
+            },
+            ls: {
+                description: 'List available sections',
+                action: () => {
+                    return `<div class="output">
+<span class="success">Available Sections:</span>
+
+drwxr-xr-x  about/          Personal information
+drwxr-xr-x  education/      Academic background
+drwxr-xr-x  experience/     Work history
+drwxr-xr-x  skills/         Technical abilities
+drwxr-xr-x  projects/       Portfolio showcase
+drwxr-xr-x  iot/            IoT expertise
+drwxr-xr-x  publications/   Research papers
+drwxr-xr-x  community/      Leadership & service
+drwxr-xr-x  contact/        Get in touch
+-rw-r--r--  resume          CV/Resume
+
+Type the section name to view contents
 </div>`;
                 }
             },
@@ -456,21 +636,27 @@ Let's build something amazing together!
 
         function getBanner() {
             return `<div class="ascii-art">
- ██████╗  ██████╗ ██████╗ ████████╗███████╗ ██████╗ ██╗     ██╗ ██████╗ 
- ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝██╔════╝██╔═══██╗██║     ██║██╔═══██╗
- ██████╔╝██║   ██║██████╔╝   ██║   █████╗  ██║   ██║██║     ██║██║   ██║
- ██╔═══╝ ██║   ██║██╔══██╗   ██║   ██╔══╝  ██║   ██║██║     ██║██║   ██║
- ██║     ╚██████╔╝██║  ██║   ██║   ██║     ╚██████╔╝███████╗██║╚██████╔╝
- ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ 
+ ██████╗  █████╗ ██╗   ██╗██╗         ███╗   ██╗████████╗██╗
+ ██╔══██╗██╔══██╗██║   ██║██║         ████╗  ██║╚══██╔══╝██║
+ ██████╔╝███████║██║   ██║██║         ██╔██╗ ██║   ██║   ██║
+ ██╔═══╝ ██╔══██║██║   ██║██║         ██║╚██╗██║   ██║   ██║
+ ██║     ██║  ██║╚██████╔╝███████╗    ██║ ╚████║   ██║   ██║
+ ╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚═╝  ╚═══╝   ╚═╝   ╚═╝
 </div>
 <div class="output">
-<span class="success">Welcome to my interactive portfolio terminal!</span>
+<span class="success">Welcome to Paul Yaw Nti's Interactive Portfolio!</span>
+
+MS Computer Science @ UCL | Systems Engineering for IoT
+Software Engineer | Open to Internship Opportunities
 
 Type <span class="highlight">'help'</span> to see available commands.
-Type <span class="highlight">'about'</span> to learn more about me.
+Or just ask me anything naturally - I'm powered by AI! 🤖
+
+Examples: "Tell me about your IoT experience", "What's the AgriConnect project?"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 </div>`;
+        }
         }
 
         function addLine(content, type = '') {
@@ -481,8 +667,9 @@ Type <span class="highlight">'about'</span> to learn more about me.
             output.scrollTop = output.scrollHeight;
         }
 
-        function processCommand(cmd) {
-            const trimmedCmd = cmd.trim().toLowerCase();
+        async function processCommand(cmd) {
+            const trimmedCmd = cmd.trim();
+            const lowerCmd = trimmedCmd.toLowerCase();
             
             addLine(`<span class="prompt">visitor@portfolio:~$</span> <span class="command">${cmd}</span>`);
 
@@ -490,14 +677,34 @@ Type <span class="highlight">'about'</span> to learn more about me.
                 return;
             }
 
-            if (commands[trimmedCmd]) {
-                const result = commands[trimmedCmd].action();
+            // Check if it's a predefined command
+            if (commands[lowerCmd]) {
+                const result = commands[lowerCmd].action();
                 if (result) {
                     addLine(result);
                 }
             } else {
-                addLine(`<span class="error">Command not found: ${cmd}</span>
-<span class="output">Type 'help' for available commands.</span>`, 'error');
+                // If not a command, treat it as a natural language query to Claude
+                if (isProcessing) {
+                    addLine(`<span class="error">Please wait for the current request to complete...</span>`, 'error');
+                    return;
+                }
+
+                isProcessing = true;
+                addLine(`<span class="output">🤔 Thinking...</span>`);
+                
+                try {
+                    const response = await askClaude(trimmedCmd);
+                    // Remove the "thinking" message
+                    output.removeChild(output.lastChild);
+                    addLine(`<div class="output"><span class="success">🤖 AI Response:</span>
+${response}</div>`);
+                } catch (error) {
+                    output.removeChild(output.lastChild);
+                    addLine(`<span class="error">AI features unavailable. Try commands like 'help', 'about', or 'skills'.</span>`, 'error');
+                } finally {
+                    isProcessing = false;
+                }
             }
 
             commandHistory.unshift(cmd);
@@ -506,6 +713,7 @@ Type <span class="highlight">'about'</span> to learn more about me.
 
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
+                if (isProcessing) return;
                 const cmd = input.value;
                 processCommand(cmd);
                 input.value = '';
